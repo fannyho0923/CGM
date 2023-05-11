@@ -27,6 +27,7 @@ ChartJS.register(
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [dataset, setDataset] = useState([]);
   const [isFormInvalid, setIsFormInvalid] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const fileInput = useRef();
@@ -59,8 +60,16 @@ function App() {
         console.log("err");
       } else {
         console.log("resp");
-        console.log(resp);
-        // console.log()
+        const rows = resp.rows.slice(1);
+        const tmpArr = [];
+        for (let idx = 0; idx < rows.length; idx++) {
+          // const idx = x[1]*60+x[2];
+          // dataArr[idx] = x[3];
+          tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
+          // tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
+        }
+        setDataset(tmpArr);
+        // console.log(tmpArr);
         // this.setState({
         //   dataLoaded: true,
         //   cols: resp.cols,
@@ -78,38 +87,37 @@ function App() {
     [20230323, 23, 32, 108],
   ];
 
-  const labelArr =  new Array(1440).fill(0).map((_,i)=>i)
-  let tmpArr=[];
+  const labelArr = new Array(1440).fill(0).map((_, i) => i);
+  let tmpArr = [];
 
-  for (let idx = 0; idx < arr.length; idx++){
+  for (let idx = 0; idx < arr.length; idx++) {
     // const idx = x[1]*60+x[2];
     // dataArr[idx] = x[3];
-     tmpArr.push({x: arr[idx][1]*60 + arr[idx][2],y: arr[idx][3]})
+    tmpArr.push({ x: arr[idx][1] * 60 + arr[idx][2], y: arr[idx][3] });
   }
-  console.log(tmpArr)
 
-
-  const opts= {
+  const opts = {
     scales: {
       x: {
         ticks: {
           // For a category axis, the val is the index so the lookup via getLabelForValue is needed
           callback: function (val, index) {
             // Hide every 2nd tick label
-            return index % 120 === 0 ? this.getLabelForValue(val)/60 : "";
+            return index % 120 === 0 ? this.getLabelForValue(val) / 60 : "";
           },
-          color: "red"
-        }
-      }
-    }
-  }
+          color: "red",
+        },
+      },
+    },
+  };
+  console.log(dataset);
 
   const data = {
     labels: labelArr,
     datasets: [
       {
         label: "Dataset 1",
-        data: tmpArr,
+        data: dataset,
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
@@ -128,9 +136,6 @@ function App() {
       <Box>
         <form>
           <FormGroup row>
-            <Typography for="exampleFile" xs={6} sm={4} lg={2} size="lg">
-              Upload
-            </Typography>
             <Box xs={4} sm={8} lg={10}>
               <Box>
                 <Box addonType="prepend">
@@ -160,9 +165,11 @@ function App() {
           </FormGroup>
         </form>
       </Box>
-      <Box style={{width:"50%"}}>
-      <Line data={data} options={opts} />
-      </Box>
+      {dataset && (
+        <Box style={{ width: "50%" }}>
+          <Line data={data} options={opts} />
+        </Box>
+      )}
     </div>
   );
 }
