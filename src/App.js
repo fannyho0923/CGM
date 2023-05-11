@@ -73,47 +73,43 @@ function App() {
   // ["Date(年/月/日)", "時", "分", "CGMGlucoseValue"],
   const arr = [
     [20230323, 15, 31, 110],
-    [20230323, 17, 32, 109],
-    [20230323, 21, 32, 109],
-    [20230323, 23, 32, 109],
+    [20230323, 17, 32, 96],
+    [20230323, 21, 32, 104],
+    [20230323, 23, 32, 108],
   ];
 
-  const data1 = [110, 109, 109, 109];
+  const labelArr =  new Array(1440).fill(0).map((_,i)=>i)
+  let tmpArr=[];
 
-  const timeLabel = [
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12pm",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-  ];
+  for (let idx = 0; idx < arr.length; idx++){
+    // const idx = x[1]*60+x[2];
+    // dataArr[idx] = x[3];
+     tmpArr.push({x: arr[idx][1]*60 + arr[idx][2],y: arr[idx][3]})
+  }
+  console.log(tmpArr)
+
+
+  const opts= {
+    scales: {
+      x: {
+        ticks: {
+          // For a category axis, the val is the index so the lookup via getLabelForValue is needed
+          callback: function (val, index) {
+            // Hide every 2nd tick label
+            return index % 120 === 0 ? this.getLabelForValue(val)/60 : "";
+          },
+          color: "red"
+        }
+      }
+    }
+  }
 
   const data = {
-    labels: timeLabel,
+    labels: labelArr,
     datasets: [
       {
         label: "Dataset 1",
-        data: data1,
+        data: tmpArr,
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
@@ -164,7 +160,9 @@ function App() {
           </FormGroup>
         </form>
       </Box>
-      <Line data={data} />
+      <Box style={{width:"50%"}}>
+      <Line data={data} options={opts} />
+      </Box>
     </div>
   );
 }
