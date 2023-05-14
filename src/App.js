@@ -1,5 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect, useRef } from "react";
+import { groupBy } from "lodash-es";
 import { OutTable, ExcelRenderer } from "react-excel-renderer";
 import {
   Chart as ChartJS,
@@ -28,8 +29,10 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [dataset, setDataset] = useState([]);
+  const [charts, setCharts] = useState([]);
   const [isFormInvalid, setIsFormInvalid] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [groupByDay, setGroupByDay] = useState([]);
   const fileInput = useRef();
   const openFileBrowser = () => {
     fileInput.current.click();
@@ -59,17 +62,59 @@ function App() {
       if (err) {
         console.log("err");
       } else {
-        console.log("resp");
-        const rows = resp.rows.slice(1);
-        const tmpArr = [];
-        for (let idx = 0; idx < rows.length; idx++) {
-          // const idx = x[1]*60+x[2];
-          // dataArr[idx] = x[3];
-          tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
-          // tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
-        }
-        setDataset(tmpArr);
+        const rows = groupBy(resp.rows.slice(1), (date) => {
+          return date[0];
+        });
+        setGroupByDay(rows);
+        // const array = [];
+        // Object.entries(rows).map((pre) => console.log(pre));
+        // console.log(Object.keys(rows).length);
+        const tmpCharts = [];
+        Object.entries(rows).map((row) => {
+          const tmpArr = [];
+          for (let idx = 0; idx < row[1].length; idx++) {
+            tmpArr.push({
+              x: row[1][idx][1] * 60 + row[1][idx][2],
+              y: row[1][idx][3],
+            });
+          }
+          tmpCharts.push({
+            label: row[0],
+            data: {
+              labels: new Array(1440).fill(0).map((_, i) => i),
+              datasets: [
+                {
+                  label: row[0],
+                  data: tmpArr,
+                  borderColor: "rgb(255, 99, 132)",
+                  backgroundColor: "rgba(255, 99, 132, 0.5)",
+                },
+              ],
+            },
+          });
+        });
+        const aaa = new Array(1440).fill(0).map((_, i) => i);
+
+        console.log(aaa);
+        setCharts(tmpCharts);
+
+        // {
+        //   label: "Dataset 1",
+        //   data: dataset,
+        //   borderColor: "rgb(255, 99, 132)",
+        //   backgroundColor: "rgba(255, 99, 132, 0.5)",
+        // }
+
+        // const tmpArr = [];
+        // for (let idx = 0; idx < rows.length; idx++) {
+        //   // const idx = x[1]*60+x[2];
+        //   // dataArr[idx] = x[3];
+        //   tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
+        //   // tmpArr.push({ x: rows[idx][1] * 60 + rows[idx][2], y: rows[idx][3] });
+        // }
+        // setDataset(tmpArr);
         // console.log(tmpArr);
+
         // this.setState({
         //   dataLoaded: true,
         //   cols: resp.cols,
@@ -78,15 +123,26 @@ function App() {
       }
     });
   };
+  console.log(charts);
+
+  // console.log("groupByDay");
+  // console.log(groupByDay);
 
   // ["Date(年/月/日)", "時", "分", "CGMGlucoseValue"],
   const arr = [
-    [20230323, 15, 31, 110],
+    [20230324, 15, 31, 110],
     [20230323, 17, 32, 96],
-    [20230323, 21, 32, 104],
+    [20230325, 21, 32, 104],
+    [20230324, 21, 32, 104],
     [20230323, 23, 32, 108],
   ];
 
+  // const groupByDay = groupBy(arr, (product) => {
+  //   return product[0];
+  // });
+
+  // console.log(groupByDay);
+  //
   const labelArr = new Array(1440).fill(0).map((_, i) => i);
   let tmpArr = [];
 
@@ -99,6 +155,9 @@ function App() {
   const opts = {
     scales: {
       x: {
+        grid: {
+          display: false
+        },
         ticks: {
           // For a category axis, the val is the index so the lookup via getLabelForValue is needed
           callback: function (val, index) {
@@ -110,7 +169,6 @@ function App() {
       },
     },
   };
-  console.log(dataset);
 
   const data = {
     labels: labelArr,
@@ -165,11 +223,14 @@ function App() {
           </FormGroup>
         </form>
       </Box>
-      {dataset && (
-        <Box style={{ width: "50%" }}>
-          <Line data={data} options={opts} />
-        </Box>
-      )}
+
+      <Box style={{ width: "50%" }}>
+        {/* <p>{console.log(charts)}</p> */}
+        {charts.map((chart) => {
+          const { label, data } = chart;
+          return <Line key={label} data={data} options={opts} />;
+        })}
+      </Box>
     </div>
   );
 }
