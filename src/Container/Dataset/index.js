@@ -152,6 +152,7 @@ function dataset() {
                 ].map(({ color, height }) => {
                   return (
                     <Box
+                      key={color}
                       className="w-full "
                       style={{ backgroundColor: color, height: `${height}%` }}
                     ></Box>

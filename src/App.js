@@ -13,6 +13,7 @@ import {
   Legend,
 } from "chart.js";
 import Dataset from "../src/Container/Dataset";
+import RecordSheet from "../src/Container/RecordSheet";
 import { Line } from "react-chartjs-2";
 import { Input, FormGroup, Typography, Button, Box } from "@mui/material";
 
@@ -188,6 +189,7 @@ function App() {
         })}
       </Box>
       <Dataset />
+      <RecordSheet />
     </Box>
   );
 }
