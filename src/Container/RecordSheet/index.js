@@ -1,13 +1,17 @@
-import { Box } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography } from "@mui/material";
 import classNames from "classnames";
+import dayjs from "dayjs";
 
 const RecordTableTemplate = ({
+  date = "",
   idx = "",
   title = "",
   dietContent = "",
   iDiet = "",
-  remark = "",
+  remarks = {},
 }) => {
+  const { iVal, dVal, pcVal } = remarks;
   return (
     <Box className="border border-black w-1/5">
       <Box className="border-b border-black">
@@ -39,7 +43,7 @@ const RecordTableTemplate = ({
       >
         {idx === 0 && (
           <Box className="flex items-center p-2 border-r-2 border-black">
-            02/13
+            {date}
           </Box>
         )}
         <Box className="flex items-center grow break-all p-px">
@@ -49,47 +53,41 @@ const RecordTableTemplate = ({
           className="flex items-center grow p-px"
           style={{ backgroundColor: iDiet ? "rgb(163 230 53)" : "" }}
         >
-          {iDiet}
+          {iDiet || ""}
         </Box>
         <Box className="grow divide-y divide-dashed">
-          <Box className="h-1/5 flex items-center p-px">{remark}</Box>
-          <Box className="grow flex items-center p-px"></Box>
+          <Box className="h-1/5 flex items-center p-px">{iVal && "i"}</Box>
+          <Box className="grow flex items-center p-px">
+            {`${dVal ? "D" : ""}${dVal && pcVal ? "," : ""}${
+              pcVal ? "PC" : ""
+            }`}
+          </Box>
         </Box>
       </Box>
     </Box>
   );
 };
 
-function RecordSheet() {
+// `第一餐(${dayjs(times.startDay1Time).format("HH:mm")}-${dayjs(
+//     times.endDay1Time
+//   ).format("HH:mm")})`,
+
+function RecordSheet({ date = "", records = [] }) {
   return (
     <Box className="p-2 flex justify-center items-center">
       <Box className="border border-black">
         <Box className="flex">
-          {[
-            { title: `第一餐(06:00-10:00)` },
-            {
-              title: `第二餐(10:00-14:00)`,
-              dietContent: "1227Buffet",
-              iDiet: "0.72",
-              remark: "1",
-            },
-            { title: `第三餐(14:00-17:00)` },
-            {
-              title: `第四餐(17:00-21:00)`,
-              dietContent: "1833木瓜+黑木耳露無糖",
-              iDiet: "0.10",
-            },
-            { title: `第五餐(22:00-24:00)` },
-          ].map((item, idx) => {
-            const { title, dietContent, iDiet, remark } = item;
+          {records.map((item, idx) => {
+            const { title, dietContent, iDiet, remarks } = item;
             return (
               <RecordTableTemplate
+                date={date}
                 key={idx}
                 idx={idx}
                 title={title}
                 dietContent={dietContent}
                 iDiet={iDiet}
-                remark={remark}
+                remarks={remarks}
               />
             );
           })}

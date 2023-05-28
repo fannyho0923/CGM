@@ -81,7 +81,7 @@ const GradeTable = () => {
   );
 };
 
-function dataset() {
+function Dataset() {
   return (
     <Box>
       <Box className="flex">
@@ -186,4 +186,4 @@ function dataset() {
   );
 }
 
-export default dataset;
+export default Dataset;

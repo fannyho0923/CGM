@@ -1,7 +1,12 @@
 import "./App.css";
-import React, { useState, useRef } from "react";
-import { groupBy } from "lodash-es";
+import React, { useState, useRef, useEffect } from "react";
+import dayjs from "dayjs";
+import { groupBy, round } from "lodash-es";
 import { ExcelRenderer } from "react-excel-renderer";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,10 +17,34 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import {
+  getTimeText,
+  getRangeArr,
+  getIArr,
+  getJArr,
+  getMaxBsv,
+  getIDiet,
+  getIval,
+  getDval,
+  getPCval,
+} from "../src/utils";
 import Dataset from "../src/Container/Dataset";
 import RecordSheet from "../src/Container/RecordSheet";
 import { Line } from "react-chartjs-2";
-import { Input, FormGroup, Typography, Button, Box } from "@mui/material";
+import {
+  Input,
+  FormGroup,
+  Typography,
+  Button,
+  Box,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 
 ChartJS.register(
   CategoryScale,
@@ -27,14 +56,246 @@ ChartJS.register(
   Legend
 );
 
+const RowRadioButtonsGroup = ({ onChange = () => {} }) => {
+  return (
+    <FormControl>
+      <RadioGroup
+        row
+        aria-labelledby="demo-row-radio-buttons-group-label"
+        name="row-radio-buttons-group"
+        onChange={onChange}
+      >
+        <FormControlLabel
+          value="allDays"
+          control={<Radio />}
+          label="整合各天數"
+        />
+        <FormControlLabel
+          value="oneDay"
+          control={<Radio />}
+          label="一日完整報告"
+        />
+      </RadioGroup>
+    </FormControl>
+  );
+};
+
+const AssignTable = ({
+  listDay,
+  selectedDate,
+  handleDate = () => {},
+  handleTime = () => {},
+}) => {
+  return (
+    <>
+      <FormControl className="w-1/2">
+        <InputLabel id="select-label">選擇第幾天</InputLabel>
+        <Select
+          labelId="select-label"
+          id="select-date"
+          value={selectedDate}
+          label="選擇第幾天"
+          onChange={handleDate}
+        >
+          {listDay.map((val) => (
+            <MenuItem value={val}>{val}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Box className="grid grid-cols-2 gap-4">
+        <Box>
+          <Typography>第一餐</Typography>
+          <Box className="flex space-x-2">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "startDay1Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "endDay1Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </Box>
+        <Box>
+          <Typography>第二餐</Typography>
+          <Box className="flex space-x-2">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "startDay2Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "endDay2Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </Box>
+        <Box>
+          <Typography>第三餐</Typography>
+          <Box className="flex space-x-2">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "startDay3Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "endDay3Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </Box>
+        <Box>
+          <Typography>第四餐</Typography>
+          <Box className="flex space-x-2">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "startDay4Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "endDay4Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </Box>
+        <Box>
+          <Typography>第五餐</Typography>
+          <Box className="flex space-x-2">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "startDay5Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["TimePicker"]}>
+                <TimePicker
+                  label="Basic time picker"
+                  onChange={(e) => handleTime(e, "endDay5Time")}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </Box>
+      </Box>
+    </>
+  );
+};
+
 function App() {
+  const [chart, setChart] = useState([]);
   const [charts, setCharts] = useState([]);
+  const [oneChart, setOneChart] = useState([]);
   const [isFormInvalid, setIsFormInvalid] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [groupByDay, setGroupByDay] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedChart, setSelectedChart] = useState("");
+  const [showChart, setShowChart] = useState(false);
+  const [dayVal, setDayVal] = useState([]);
+  const [times, setTimes] = useState({
+    startDateTime: "",
+    startDay1Time: "",
+    startDay2Time: "",
+    startDay3Time: "",
+    startDay4Time: "",
+    startDay5Time: "",
+    endDay1Time: "",
+    endDay2Time: "",
+    endDay3Time: "",
+    endDay4Time: "",
+    endDay5Time: "",
+  });
+
+  const [records, setRecords] = useState([
+    {
+      title: `第一餐(${getTimeText(times.startDay1Time, times.endDay1Time)})`,
+      dietContent: "1227Buffet",
+      iDiet: "",
+      remarks: { iVal: false, dVal: false, pcVal: false },
+    },
+    {
+      title: `第二餐(${getTimeText(times.startDay2Time, times.endDay2Time)})`,
+      dietContent: "1227Buffet",
+      iDiet: "",
+      remarks: { iVal: false, dVal: false, pcVal: false },
+    },
+    {
+      title: `第三餐(${getTimeText(times.startDay3Time, times.endDay3Time)})`,
+      dietContent: "1227Buffet",
+      iDiet: "",
+      remarks: { iVal: false, dVal: false, pcVal: false },
+    },
+    {
+      title: `第四餐(${getTimeText(times.startDay4Time, times.endDay4Time)})`,
+      dietContent: "1227Buffet",
+      iDiet: "",
+      remarks: { iVal: false, dVal: false, pcVal: false },
+    },
+    {
+      title: `第五餐(${getTimeText(times.startDay5Time, times.endDay5Time)})`,
+      dietContent: "1227Buffet",
+      iDiet: "",
+      remark: "1",
+      remarks: { iVal: false, dVal: false, pcVal: false },
+    },
+  ]);
+
+  const [listDay, setListDay] = useState([]);
+
+  function handleChangeChart(event) {
+    setSelectedChart(event.target.value);
+  }
+
+  const handleChangeTime = (e, name) => {
+    setTimes((prevState) => ({
+      ...prevState,
+      [name]: e,
+    }));
+  };
+
   const fileInput = useRef();
   const openFileBrowser = () => {
     fileInput.current.click();
+  };
+
+  const handleChangeDate = (event) => {
+    setSelectedDate(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    setShowChart(true);
   };
 
   const fileHandler = (event) => {
@@ -46,7 +307,6 @@ function App() {
       if (fileName.slice(fileName.lastIndexOf(".") + 1) === "xlsx") {
         setUploadedFileName(fileName);
         setIsFormInvalid(false);
-        // console.log(fileObj);
         renderFile(fileObj);
       } else {
         setUploadedFileName("");
@@ -68,12 +328,11 @@ function App() {
         const tmpCharts = [];
         Object.entries(rows).map((row) => {
           const tmpArr = [];
-          const minArr = [];
-          const maxArr = [];
           for (let idx = 0; idx < row[1].length; idx++) {
             tmpArr.push({
               x: row[1][idx][1] * 60 + row[1][idx][2],
               y: row[1][idx][3],
+              bsv: round(row[1][idx][3] / 18, 1),
             });
           }
 
@@ -91,26 +350,13 @@ function App() {
                 },
               ],
             },
-            plugins: {
-              annotation: {
-                annotations: {
-                  line1: {
-                    type: "line",
-                    yMin: 60,
-                    yMax: 60,
-                    borderColor: "rgb(255, 99, 132)",
-                    borderWidth: 2,
-                  },
-                },
-              },
-            },
           });
         });
         setCharts(tmpCharts);
+        setListDay(Object.keys(groupBy(tmpCharts, "label")));
       }
     });
   };
-  console.log(charts);
 
   const arr = [
     [20230324, 15, 31, 110],
@@ -139,24 +385,224 @@ function App() {
           // For a category axis, the val is the index so the lookup via getLabelForValue is needed
           callback: function (val, index) {
             // Hide every 2nd tick label
-            return index % 120 === 0 ? this.getLabelForValue(val) / 60 : "";
+            return index % 120 === 0
+              ? parseInt(this.getLabelForValue(val) / 60)
+              : "";
           },
           color: "red",
         },
+        min: times.startDateTime.$H * 60 + times.startDateTime.$m || 0,
+      },
+      y: {
+        min: 50,
+        max: 250,
       },
     },
   };
+
+  useEffect(() => {
+    setShowChart(false);
+    if (selectedChart === "allDays") {
+      setSelectedDate("");
+    }
+    setChart(selectedChart === "allDays" ? charts : oneChart);
+  }, [selectedChart, selectedDate]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      setChart([charts.find(({ label }) => label === selectedDate)]);
+      setDayVal(chart[0]?.data.datasets[0].data);
+    }
+  }, [selectedDate]);
+  useEffect(() => {
+    if (selectedDate) {
+      setDayVal(chart[0]?.data.datasets[0].data);
+    }
+  }, [chart]);
+
+  useEffect(() => {
+    setRecords([
+      {
+        title: `第一餐(${getTimeText(times.startDay1Time, times.endDay1Time)})`,
+        dietContent: "1227Buffet",
+        iDiet: getIDiet(
+          getIArr(getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)),
+          getJArr(
+            getIArr(getRangeArr(dayVal, times.startDay1Time, times.endDay1Time))
+          )
+        ),
+        remarks: {
+          iVal: getIval(
+            getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)?.shift()
+              ?.bsv,
+            dayVal,
+            getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)
+          ),
+          dVal: getDval(
+            getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)?.pop()
+              ?.bsv,
+            getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)?.shift()
+              ?.bsv
+          ),
+          pcVal: getPCval(
+            getMaxBsv(
+              getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)
+            ),
+            getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)?.shift()
+              ?.bsv
+          ),
+        },
+      },
+      {
+        title: `第二餐(${getTimeText(times.startDay2Time, times.endDay2Time)})`,
+        dietContent: "1227Buffet",
+        iDiet: getIDiet(
+          getIArr(getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)),
+          getJArr(
+            getIArr(getRangeArr(dayVal, times.startDay2Time, times.endDay2Time))
+          )
+        ),
+        remarks: {
+          iVal: getIval(
+            getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)?.shift()
+              ?.bsv,
+            dayVal,
+            getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)
+          ),
+          dVal: getDval(
+            getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)?.pop()
+              ?.bsv,
+            getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)?.shift()
+              ?.bsv
+          ),
+          pcVal: getPCval(
+            getMaxBsv(
+              getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)
+            ),
+            getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)?.shift()
+              ?.bsv
+          ),
+        },
+      },
+      {
+        title: `第三餐(${getTimeText(times.startDay3Time, times.endDay3Time)})`,
+        dietContent: "1227Buffet",
+        iDiet: getIDiet(
+          getIArr(getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)),
+          getJArr(
+            getIArr(getRangeArr(dayVal, times.startDay3Time, times.endDay3Time))
+          )
+        ),
+        remarks: {
+          iVal: getIval(
+            getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)?.shift()
+              ?.bsv,
+            dayVal,
+            getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)
+          ),
+          dVal: getDval(
+            getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)?.pop()
+              ?.bsv,
+            getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)?.shift()
+              ?.bsv
+          ),
+          pcVal: getPCval(
+            getMaxBsv(
+              getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)
+            ),
+            getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)?.shift()
+              ?.bsv
+          ),
+        },
+      },
+      {
+        title: `第四餐(${getTimeText(
+          times.startDay4Time,
+          times.endDay4Time,
+          times.endDay4Time
+        )})`,
+        dietContent: "1227Buffet",
+        iDiet: getIDiet(
+          getIArr(getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)),
+          getJArr(
+            getIArr(getRangeArr(dayVal, times.startDay4Time, times.endDay4Time))
+          )
+        ),
+        remarks: {
+          iVal: getIval(
+            getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)?.shift()
+              ?.bsv,
+            dayVal,
+            getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)
+          ),
+          dVal: getDval(
+            getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)?.pop()
+              ?.bsv,
+            getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)?.shift()
+              ?.bsv
+          ),
+          pcVal: getPCval(
+            getMaxBsv(
+              getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)
+            ),
+            getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)?.shift()
+              ?.bsv
+          ),
+        },
+      },
+      {
+        title: `第五餐(${getTimeText(
+          times.startDay5Time,
+          times.endDay5Time,
+          times.endDay5Time
+        )})`,
+        dietContent: "1227Buffet",
+        iDiet: getIDiet(
+          getIArr(getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)),
+          getJArr(
+            getIArr(getRangeArr(dayVal, times.startDay5Time, times.endDay5Time))
+          )
+        ),
+        remark: "1",
+        remarks: {
+          iVal: getIval(
+            getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)?.shift()
+              ?.bsv,
+            dayVal,
+            getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)
+          ),
+          dVal: getDval(
+            getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)?.pop()
+              ?.bsv,
+            getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)?.shift()
+              ?.bsv
+          ),
+          pcVal: getPCval(
+            getMaxBsv(
+              getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)
+            ),
+            getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)?.shift()
+              ?.bsv
+          ),
+        },
+      },
+    ]);
+  }, [times]);
 
   return (
     <Box>
       <Box>
         <form>
           <FormGroup row>
-            <Box xs={4} sm={8} lg={10}>
-              <Box>
+            <Box className="flex flex-col">
+              <Box className="flex space-x-2">
                 <Box addonType="prepend">
-                  <Button color="info" onClick={openFileBrowser}>
-                    <i className="cui-file"></i> Browse&hellip;
+                  <Button
+                    variant="outlined"
+                    color="info"
+                    onClick={openFileBrowser}
+                  >
+                    <i className="cui-file"></i> 匯入excel&hellip;
                   </Button>
                   <input
                     type="file"
@@ -177,19 +623,54 @@ function App() {
                   invalid={isFormInvalid}
                 />
               </Box>
+              <Typography>選擇開始時間段</Typography>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={["TimePicker"]}>
+                  <TimePicker
+                    value={times.startDateTime || null}
+                    label="Basic time picker"
+                    onChange={(e) => handleChangeTime(e, "startDateTime")}
+                    format="hh:mm"
+                  />
+                </DemoContainer>
+              </LocalizationProvider>
+              <RowRadioButtonsGroup onChange={handleChangeChart} />
+              {selectedChart === "oneDay" && (
+                <AssignTable
+                  listDay={listDay}
+                  selectedDate={selectedDate}
+                  // times={times}
+                  handleDate={handleChangeDate}
+                  handleTime={handleChangeTime}
+                />
+              )}
+              <Button
+                variant="contained"
+                className="w-1/2 "
+                onClick={handleSubmit}
+              >
+                送出
+              </Button>
             </Box>
           </FormGroup>
         </form>
       </Box>
 
-      <Box style={{ width: "50%" }}>
-        {charts.map((chart) => {
-          const { label, data } = chart;
-          return <Line key={label} data={data} options={opts} />;
-        })}
-      </Box>
+      {showChart && (
+        <Box style={{ width: "50%" }}>
+          {chart.map((chart) => {
+            const { label, data } = chart;
+            return <Line key={label} data={data} options={opts} />;
+          })}
+        </Box>
+      )}
       <Dataset />
-      <RecordSheet />
+      <RecordSheet
+        date={dayjs(selectedDate).format("M/D")}
+        times={times}
+        records={records}
+        dayVal={chart[0]?.data.datasets[0].data}
+      />
     </Box>
   );
 }
