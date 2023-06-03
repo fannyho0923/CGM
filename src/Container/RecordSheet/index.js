@@ -68,10 +68,6 @@ const RecordTableTemplate = ({
   );
 };
 
-// `第一餐(${dayjs(times.startDay1Time).format("HH:mm")}-${dayjs(
-//     times.endDay1Time
-//   ).format("HH:mm")})`,
-
 function RecordSheet({ date = "", records = [] }) {
   return (
     <Box className="p-2 flex justify-center items-center">

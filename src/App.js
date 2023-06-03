@@ -1,7 +1,8 @@
 import "./App.css";
-import React, { useState, useRef, useEffect } from "react";
+import { useReactToPrint } from "react-to-print";
+import React, { useState, useRef, useEffect, createRef } from "react";
 import dayjs from "dayjs";
-import { groupBy, round } from "lodash-es";
+import { groupBy, round, isEmpty } from "lodash-es";
 import { ExcelRenderer } from "react-excel-renderer";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -109,7 +110,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第一餐開始"
                   onChange={(e) => handleTime(e, "startDay1Time")}
                 />
               </DemoContainer>
@@ -117,7 +118,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第一餐結束"
                   onChange={(e) => handleTime(e, "endDay1Time")}
                 />
               </DemoContainer>
@@ -130,7 +131,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第二餐開始"
                   onChange={(e) => handleTime(e, "startDay2Time")}
                 />
               </DemoContainer>
@@ -138,7 +139,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第二餐結束"
                   onChange={(e) => handleTime(e, "endDay2Time")}
                 />
               </DemoContainer>
@@ -151,7 +152,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第三餐開始"
                   onChange={(e) => handleTime(e, "startDay3Time")}
                 />
               </DemoContainer>
@@ -159,7 +160,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第三餐結束"
                   onChange={(e) => handleTime(e, "endDay3Time")}
                 />
               </DemoContainer>
@@ -172,7 +173,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第四餐開始"
                   onChange={(e) => handleTime(e, "startDay4Time")}
                 />
               </DemoContainer>
@@ -180,7 +181,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第四餐結束"
                   onChange={(e) => handleTime(e, "endDay4Time")}
                 />
               </DemoContainer>
@@ -193,7 +194,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第五餐開始"
                   onChange={(e) => handleTime(e, "startDay5Time")}
                 />
               </DemoContainer>
@@ -201,7 +202,7 @@ const AssignTable = ({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
-                  label="Basic time picker"
+                  label="第五餐結束"
                   onChange={(e) => handleTime(e, "endDay5Time")}
                 />
               </DemoContainer>
@@ -213,7 +214,8 @@ const AssignTable = ({
   );
 };
 
-function App() {
+const MainDoc = () => {
+  const [rawData, setRawData] = useState([]);
   const [chart, setChart] = useState([]);
   const [charts, setCharts] = useState([]);
   const [oneChart, setOneChart] = useState([]);
@@ -321,6 +323,7 @@ function App() {
       if (err) {
         console.log("err");
       } else {
+        setRawData(resp.rows.slice(1));
         const rows = groupBy(resp.rows.slice(1), (date) => {
           return date[0];
         });
@@ -358,23 +361,6 @@ function App() {
     });
   };
 
-  const arr = [
-    [20230324, 15, 31, 110],
-    [20230323, 17, 32, 96],
-    [20230325, 21, 32, 104],
-    [20230324, 21, 32, 104],
-    [20230323, 23, 32, 108],
-  ];
-
-  const labelArr = new Array(1440).fill(0).map((_, i) => i);
-  let tmpArr = [];
-
-  for (let idx = 0; idx < arr.length; idx++) {
-    // const idx = x[1]*60+x[2];
-    // dataArr[idx] = x[3];
-    tmpArr.push({ x: arr[idx][1] * 60 + arr[idx][2], y: arr[idx][3] });
-  }
-
   const opts = {
     scales: {
       x: {
@@ -391,7 +377,7 @@ function App() {
           },
           color: "red",
         },
-        min: times.startDateTime.$H * 60 + times.startDateTime.$m || 0,
+        // min: times.startDateTime.$H * 60 + times.startDateTime.$m || 0,
       },
       y: {
         min: 50,
@@ -414,11 +400,72 @@ function App() {
       setDayVal(chart[0]?.data.datasets[0].data);
     }
   }, [selectedDate]);
+
   useEffect(() => {
     if (selectedDate) {
       setDayVal(chart[0]?.data.datasets[0].data);
     }
   }, [chart]);
+
+  useEffect(() => {
+    const selectedDateTime =
+      times.startDateTime.$H * 60 + times.startDateTime.$m;
+
+    const tempArr = [];
+    for (let i = 0; i < rawData.length; i++) {
+      if (rawData[i][1] * 60 + rawData[i][2] >= selectedDateTime) {
+        if (
+          tempArr.find((tempItem) => tempItem[0] === rawData[i][0]) ===
+          undefined
+        ) {
+          tempArr.push(rawData[i]);
+        } else {
+          continue;
+        }
+      }
+    }
+    const resArr = [];
+    for (let i = 0; i < tempArr.length - 1; i++) {
+      resArr.push([
+        `${tempArr[i][0]}`,
+        rawData.slice(
+          rawData.findIndex((item) => item === tempArr[i]),
+          rawData.findIndex((item) => item === tempArr[i + 1])
+        ),
+      ]);
+    }
+    const tmpCharts = [];
+
+    resArr.map((row) => {
+      const tmpArr = [];
+      for (let idx = 0; idx < row[1].length; idx++) {
+        tmpArr.push({
+          x: row[1][idx][1] * 60 + row[1][idx][2],
+          y: row[1][idx][3],
+          bsv: round(row[1][idx][3] / 18, 1),
+        });
+      }
+
+      tmpCharts.push({
+        label: row[0],
+        data: {
+          labels: new Array(1440).fill(0).map((_, i) => i),
+          datasets: [
+            {
+              label: row[0],
+              data: tmpArr,
+              borderColor: "rgb(255, 99, 132)",
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              pointStyle: false,
+            },
+          ],
+        },
+      });
+    });
+
+    setCharts(tmpCharts);
+    setListDay(Object.keys(groupBy(tmpCharts, "label")));
+  }, [times.startDateTime]);
 
   useEffect(() => {
     setRecords([
@@ -590,13 +637,13 @@ function App() {
   }, [times]);
 
   return (
-    <Box>
+    <Box style={{ width: "100%" }}>
       <Box>
         <form>
           <FormGroup row>
             <Box className="flex flex-col">
               <Box className="flex space-x-2">
-                <Box addonType="prepend">
+                <Box>
                   <Button
                     variant="outlined"
                     color="info"
@@ -605,7 +652,7 @@ function App() {
                     <i className="cui-file"></i> 匯入excel&hellip;
                   </Button>
                   <input
-                    type="file"
+                    type={isEmpty(charts) ? "file" : "text"}
                     hidden
                     onChange={fileHandler}
                     ref={fileInput}
@@ -630,7 +677,6 @@ function App() {
                     value={times.startDateTime || null}
                     label="Basic time picker"
                     onChange={(e) => handleChangeTime(e, "startDateTime")}
-                    format="hh:mm"
                   />
                 </DemoContainer>
               </LocalizationProvider>
@@ -639,7 +685,6 @@ function App() {
                 <AssignTable
                   listDay={listDay}
                   selectedDate={selectedDate}
-                  // times={times}
                   handleDate={handleChangeDate}
                   handleTime={handleChangeTime}
                 />
@@ -666,12 +711,31 @@ function App() {
       )}
       <Dataset />
       <RecordSheet
-        date={dayjs(selectedDate).format("M/D")}
+        date={selectedDate ? dayjs(selectedDate).format("M/D") : ""}
         times={times}
         records={records}
         dayVal={chart[0]?.data.datasets[0].data}
       />
     </Box>
+  );
+};
+
+function App() {
+  const ref = createRef();
+  const handlePrint = useReactToPrint({
+    content: () => ref.current,
+  });
+  return (
+    <>
+      <div
+        style={{ margin: "0 auto", width: "100%", height: "100%" }}
+        ref={ref}
+        filename="gmt.pdf"
+      >
+        <MainDoc />
+      </div>
+      <Button onClick={handlePrint}> Print</Button>
+    </>
   );
 }
 
