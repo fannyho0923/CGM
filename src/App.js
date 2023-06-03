@@ -8,6 +8,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import annotationPlugin from "chartjs-plugin-annotation";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -54,7 +55,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 const RowRadioButtonsGroup = ({ onChange = () => {} }) => {
@@ -382,6 +384,67 @@ const MainDoc = () => {
       y: {
         min: 50,
         max: 250,
+      },
+    },
+    plugins: {
+      annotation: {
+        annotations: {
+          box1: {
+            type: "box",
+            xMin: times.startDay1Time.$H * 60 + times.startDay1Time.$m || 0,
+            xMax:
+              times.endDay1Time.$H * 60 + times.endDay1Time.$m ||
+              times.startDay1Time.$H * 60 + times.startDay1Time.$m ||
+              0,
+            yMin: 50,
+            yMax: 250,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+          },
+          box2: {
+            type: "box",
+            xMin: times.startDay2Time.$H * 60 + times.startDay2Time.$m || 0,
+            xMax:
+              times.endDay2Time.$H * 60 + times.endDay2Time.$m ||
+              times.startDay2Time.$H * 60 + times.startDay2Time.$m ||
+              0,
+            yMin: 50,
+            yMax: 250,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+          },
+          box3: {
+            type: "box",
+            xMin: times.startDay3Time.$H * 60 + times.startDay3Time.$m || 0,
+            xMax:
+              times.endDay3Time.$H * 60 + times.endDay3Time.$m ||
+              times.startDay3Time.$H * 60 + times.startDay3Time.$m ||
+              0,
+            yMin: 50,
+            yMax: 250,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+          },
+          box4: {
+            type: "box",
+            xMin: times.startDay4Time.$H * 60 + times.startDay4Time.$m || 0,
+            xMax:
+              times.endDay4Time.$H * 60 + times.endDay4Time.$m ||
+              times.startDay4Time.$H * 60 + times.startDay4Time.$m ||
+              0,
+            yMin: 50,
+            yMax: 250,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+          },
+          box5: {
+            type: "box",
+            xMin: times.startDay5Time.$H * 60 + times.startDay5Time.$m || 0,
+            xMax:
+              times.endDay5Time.$H * 60 + times.endDay5Time.$m ||
+              times.startDay5Time.$H * 60 + times.startDay5Time.$m ||
+              0,
+            yMin: 50,
+            yMax: 250,
+            backgroundColor: "rgba(255, 99, 132, 0.25)",
+          },
+        },
       },
     },
   };
