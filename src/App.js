@@ -216,7 +216,11 @@ const AssignTable = ({
   );
 };
 
-const MainDoc = () => {
+const MainDoc = ({ handleReset }) => {
+  const ref = createRef();
+  const handlePrint = useReactToPrint({
+    content: () => ref.current,
+  });
   const [rawData, setRawData] = useState([]);
   const [chart, setChart] = useState([]);
   const [charts, setCharts] = useState([]);
@@ -298,7 +302,64 @@ const MainDoc = () => {
     setSelectedDate(event.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (selectedDateTime) => {
+    const alignedData = new Array(listDay.length * 1440).fill("");
+    for (let i = 0; i < rawData.length; i++) {
+      let idx = listDay.findIndex(
+        (val) => Number(val) === Number(rawData[i][0])
+      );
+      alignedData[rawData[i][1] * 60 + rawData[i][2] + 1440 * idx] = rawData[i];
+    }
+
+    const alignedArr = [];
+
+    for (let i = 0; i < listDay.length - 1; i++) {
+      alignedArr.push([
+        `${listDay[i]}`,
+        alignedData.slice(
+          selectedDateTime + i * 1440,
+          selectedDateTime + 1440 + i * 1440
+        ),
+      ]);
+    }
+
+    const alignedCharts = [];
+
+    alignedArr.map((row) => {
+      const tmpArr = [];
+      for (let idx = 0; idx < row[1].length; idx++) {
+        tmpArr.push({
+          x: row[1][idx][1] * 60 + row[1][idx][2],
+          y: row[1][idx][3],
+          bsv: round(row[1][idx][3] / 18, 1),
+        });
+      }
+      alignedCharts.push({
+        label: row[0],
+        data: {
+          labels: new Array(1440).fill(0).map((_, i) => {
+            const tmpLabel =
+              Math.trunc(selectedDateTime / 60) + Math.trunc(i / 60);
+            return tmpLabel >= 24 ? tmpLabel - 24 : tmpLabel;
+          }),
+          datasets: [
+            {
+              label: row[0],
+              data: tmpArr,
+              borderColor: "rgb(255, 99, 132)",
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              pointStyle: false,
+            },
+          ],
+        },
+      });
+    });
+
+    setCharts(alignedCharts);
+    setListDay(Object.keys(groupBy(alignedCharts, "label")));
+    if (!isEmpty(alignedCharts) && selectedChart === "allDays") {
+      setChart(alignedCharts);
+    }
     setShowChart(true);
   };
 
@@ -331,6 +392,7 @@ const MainDoc = () => {
         });
         setGroupByDay(rows);
         const tmpCharts = [];
+        const selectedDateTime = 0;
         Object.entries(rows).map((row) => {
           const tmpArr = [];
           for (let idx = 0; idx < row[1].length; idx++) {
@@ -344,7 +406,9 @@ const MainDoc = () => {
           tmpCharts.push({
             label: row[0],
             data: {
-              labels: new Array(1440).fill(0).map((_, i) => i),
+              labels: new Array(1440).fill(0).map((_, i) => {
+                return Math.trunc(selectedDateTime / 60);
+              }),
               datasets: [
                 {
                   label: row[0],
@@ -370,16 +434,9 @@ const MainDoc = () => {
           display: false,
         },
         ticks: {
-          // For a category axis, the val is the index so the lookup via getLabelForValue is needed
-          callback: function (val, index) {
-            // Hide every 2nd tick label
-            return index % 120 === 0
-              ? parseInt(this.getLabelForValue(val) / 60)
-              : "";
-          },
+          maxTicksLimit: 24,
           color: "red",
         },
-        // min: times.startDateTime.$H * 60 + times.startDateTime.$m || 0,
       },
       y: {
         min: 50,
@@ -455,7 +512,7 @@ const MainDoc = () => {
       setSelectedDate("");
     }
     setChart(selectedChart === "allDays" ? charts : oneChart);
-  }, [selectedChart, selectedDate]);
+  }, [selectedChart, selectedDate, times.startDateTime]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -471,63 +528,7 @@ const MainDoc = () => {
   }, [chart]);
 
   useEffect(() => {
-    const selectedDateTime =
-      times.startDateTime.$H * 60 + times.startDateTime.$m;
-
-    const tempArr = [];
-    for (let i = 0; i < rawData.length; i++) {
-      if (rawData[i][1] * 60 + rawData[i][2] >= selectedDateTime) {
-        if (
-          tempArr.find((tempItem) => tempItem[0] === rawData[i][0]) ===
-          undefined
-        ) {
-          tempArr.push(rawData[i]);
-        } else {
-          continue;
-        }
-      }
-    }
-    const resArr = [];
-    for (let i = 0; i < tempArr.length - 1; i++) {
-      resArr.push([
-        `${tempArr[i][0]}`,
-        rawData.slice(
-          rawData.findIndex((item) => item === tempArr[i]),
-          rawData.findIndex((item) => item === tempArr[i + 1])
-        ),
-      ]);
-    }
-    const tmpCharts = [];
-
-    resArr.map((row) => {
-      const tmpArr = [];
-      for (let idx = 0; idx < row[1].length; idx++) {
-        tmpArr.push({
-          x: row[1][idx][1] * 60 + row[1][idx][2],
-          y: row[1][idx][3],
-          bsv: round(row[1][idx][3] / 18, 1),
-        });
-      }
-
-      tmpCharts.push({
-        label: row[0],
-        data: {
-          labels: new Array(1440).fill(0).map((_, i) => i),
-          datasets: [
-            {
-              label: row[0],
-              data: tmpArr,
-              borderColor: "rgb(255, 99, 132)",
-              backgroundColor: "rgba(255, 99, 132, 0.5)",
-              pointStyle: false,
-            },
-          ],
-        },
-      });
-    });
-
-    setCharts(tmpCharts);
-    setListDay(Object.keys(groupBy(tmpCharts, "label")));
+    setShowChart(false);
   }, [times.startDateTime]);
 
   useEffect(() => {
@@ -733,17 +734,27 @@ const MainDoc = () => {
                   invalid={isFormInvalid}
                 />
               </Box>
-              <Typography>選擇開始時間段</Typography>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={["TimePicker"]}>
-                  <TimePicker
-                    value={times.startDateTime || null}
-                    label="Basic time picker"
-                    onChange={(e) => handleChangeTime(e, "startDateTime")}
-                  />
-                </DemoContainer>
-              </LocalizationProvider>
-              <RowRadioButtonsGroup onChange={handleChangeChart} />
+              {!isEmpty(charts) && (
+                <Box className="mb-2">
+                  <RowRadioButtonsGroup onChange={handleChangeChart} />
+                  {!isEmpty(selectedChart) && (
+                    <>
+                      <Typography>選擇開始時間段</Typography>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoContainer components={["TimePicker"]}>
+                          <TimePicker
+                            value={times.startDateTime || null}
+                            label="Basic time picker"
+                            onChange={(e) =>
+                              handleChangeTime(e, "startDateTime")
+                            }
+                          />
+                        </DemoContainer>
+                      </LocalizationProvider>
+                    </>
+                  )}
+                </Box>
+              )}
               {selectedChart === "oneDay" && (
                 <AssignTable
                   listDay={listDay}
@@ -752,20 +763,70 @@ const MainDoc = () => {
                   handleTime={handleChangeTime}
                 />
               )}
-              <Button
-                variant="contained"
-                className="w-1/2 "
-                onClick={handleSubmit}
-              >
-                送出
-              </Button>
+              <Box className="flex space-x-2 my-2">
+                <Button
+                  variant="contained"
+                  className="w-1/3"
+                  onClick={() =>
+                    handleSubmit(
+                      times.startDateTime.$H * 60 + times.startDateTime.$m
+                    )
+                  }
+                >
+                  Submit
+                </Button>
+                <Button
+                  variant="contained"
+                  className="w-1/3"
+                  onClick={handleReset}
+                >
+                  Reset
+                </Button>
+                {showChart && (
+                  <Button
+                    variant="contained"
+                    className="w-1/3"
+                    onClick={handlePrint}
+                  >
+                    Print
+                  </Button>
+                )}
+              </Box>
             </Box>
           </FormGroup>
         </form>
       </Box>
+      <div
+        style={{ margin: "0 auto", width: "100%", height: "100%" }}
+        ref={ref}
+        filename="gmt.pdf"
+      >
+        <MainChart
+          showChart={showChart}
+          chart={chart}
+          opts={opts}
+          selectedDate={selectedDate}
+          times={times}
+          records={records}
+          dayVal={dayVal}
+        />
+      </div>
+    </Box>
+  );
+};
 
+const MainChart = ({
+  showChart = false,
+  chart = [],
+  opts = {},
+  selectedDate = false,
+  times = {},
+  records = [],
+}) => {
+  return (
+    <>
       {showChart && (
-        <Box style={{ width: "50%" }}>
+        <Box className="w-full">
           {chart.map((chart) => {
             const { label, data } = chart;
             return <Line key={label} data={data} options={opts} />;
@@ -779,27 +840,17 @@ const MainDoc = () => {
         records={records}
         dayVal={chart[0]?.data.datasets[0].data}
       />
-    </Box>
+    </>
   );
 };
 
 function App() {
-  const ref = createRef();
-  const handlePrint = useReactToPrint({
-    content: () => ref.current,
-  });
-  return (
-    <>
-      <div
-        style={{ margin: "0 auto", width: "100%", height: "100%" }}
-        ref={ref}
-        filename="gmt.pdf"
-      >
-        <MainDoc />
-      </div>
-      <Button onClick={handlePrint}> Print</Button>
-    </>
-  );
+  const [count, setCount] = useState(0);
+  const handleReset = () => {
+    setCount((pre) => pre + 1);
+  };
+
+  return <MainDoc key={count} handleReset={handleReset} />;
 }
 
 export default App;
