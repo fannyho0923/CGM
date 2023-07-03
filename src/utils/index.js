@@ -1,10 +1,26 @@
+import { rgbToHex } from "@mui/material";
 import dayjs from "dayjs";
 import { round, isEmpty } from "lodash-es";
 
+export const getIDietBgColor = (iDiet = 0) => {
+  if (iDiet > 10) {
+    return "#A7A7A7";
+  } else if (iDiet >= 8) {
+    return "#FF9781";
+  } else if (iDiet >= 4) {
+    return "#FFFC98";
+  } else {
+    return "#AFE489";
+  }
+};
+
 export const getTimeText = (startTime = "", endTime = "") => {
-  return `${isEmpty(startTime) ? "" : dayjs(startTime).format("HH:mm")}-${
+  if (isEmpty(startTime) && isEmpty(endTime)) {
+    return "";
+  }
+  return `(${isEmpty(startTime) ? "" : dayjs(startTime).format("HH:mm")}-${
     isEmpty(endTime) ? "" : dayjs(endTime).format("HH:mm")
-  }`;
+  })`;
 };
 
 export const getRangeArr = (dayVal, startTime, endTime) => {

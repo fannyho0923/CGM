@@ -30,6 +30,7 @@ import {
   getDval,
   getPCval,
 } from "../src/utils";
+import AssignTable from "../src/Container/AssignTable";
 import Dataset from "../src/Container/Dataset";
 import RecordSheet from "../src/Container/RecordSheet";
 import { Line } from "react-chartjs-2";
@@ -43,9 +44,6 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
 } from "@mui/material";
 
 ChartJS.register(
@@ -83,139 +81,6 @@ const RowRadioButtonsGroup = ({ onChange = () => {} }) => {
   );
 };
 
-const AssignTable = ({
-  listDay,
-  selectedDate,
-  handleDate = () => {},
-  handleTime = () => {},
-}) => {
-  return (
-    <>
-      <FormControl className="w-1/2">
-        <InputLabel id="select-label">選擇第幾天</InputLabel>
-        <Select
-          labelId="select-label"
-          id="select-date"
-          value={selectedDate}
-          label="選擇第幾天"
-          onChange={handleDate}
-        >
-          {listDay.map((val) => (
-            <MenuItem value={val}>{val}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Box className="grid grid-cols-2 gap-4">
-        <Box>
-          <Typography>第一餐</Typography>
-          <Box className="flex space-x-2">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第一餐開始"
-                  onChange={(e) => handleTime(e, "startDay1Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第一餐結束"
-                  onChange={(e) => handleTime(e, "endDay1Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </Box>
-        <Box>
-          <Typography>第二餐</Typography>
-          <Box className="flex space-x-2">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第二餐開始"
-                  onChange={(e) => handleTime(e, "startDay2Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第二餐結束"
-                  onChange={(e) => handleTime(e, "endDay2Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </Box>
-        <Box>
-          <Typography>第三餐</Typography>
-          <Box className="flex space-x-2">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第三餐開始"
-                  onChange={(e) => handleTime(e, "startDay3Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第三餐結束"
-                  onChange={(e) => handleTime(e, "endDay3Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </Box>
-        <Box>
-          <Typography>第四餐</Typography>
-          <Box className="flex space-x-2">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第四餐開始"
-                  onChange={(e) => handleTime(e, "startDay4Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第四餐結束"
-                  onChange={(e) => handleTime(e, "endDay4Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </Box>
-        <Box>
-          <Typography>第五餐</Typography>
-          <Box className="flex space-x-2">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第五餐開始"
-                  onChange={(e) => handleTime(e, "startDay5Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={["TimePicker"]}>
-                <TimePicker
-                  label="第五餐結束"
-                  onChange={(e) => handleTime(e, "endDay5Time")}
-                />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </Box>
-      </Box>
-    </>
-  );
-};
-
 const MainDoc = ({ handleReset }) => {
   const ref = createRef();
   const handlePrint = useReactToPrint({
@@ -232,6 +97,7 @@ const MainDoc = ({ handleReset }) => {
   const [selectedChart, setSelectedChart] = useState("");
   const [showChart, setShowChart] = useState(false);
   const [dayVal, setDayVal] = useState([]);
+  const [dietContent, setDietContent] = useState([]);
   const [times, setTimes] = useState({
     startDateTime: "",
     startDay1Time: "",
@@ -248,32 +114,32 @@ const MainDoc = ({ handleReset }) => {
 
   const [records, setRecords] = useState([
     {
-      title: `第一餐(${getTimeText(times.startDay1Time, times.endDay1Time)})`,
-      dietContent: "1227Buffet",
+      title: `第一餐${getTimeText(times.startDay1Time, times.endDay1Time)}`,
+      dietContent: "",
       iDiet: "",
       remarks: { iVal: false, dVal: false, pcVal: false },
     },
     {
-      title: `第二餐(${getTimeText(times.startDay2Time, times.endDay2Time)})`,
-      dietContent: "1227Buffet",
+      title: `第二餐${getTimeText(times.startDay2Time, times.endDay2Time)}`,
+      dietContent: "",
       iDiet: "",
       remarks: { iVal: false, dVal: false, pcVal: false },
     },
     {
-      title: `第三餐(${getTimeText(times.startDay3Time, times.endDay3Time)})`,
-      dietContent: "1227Buffet",
+      title: `第三餐${getTimeText(times.startDay3Time, times.endDay3Time)}`,
+      dietContent: "",
       iDiet: "",
       remarks: { iVal: false, dVal: false, pcVal: false },
     },
     {
-      title: `第四餐(${getTimeText(times.startDay4Time, times.endDay4Time)})`,
-      dietContent: "1227Buffet",
+      title: `第四餐${getTimeText(times.startDay4Time, times.endDay4Time)}`,
+      dietContent: "",
       iDiet: "",
       remarks: { iVal: false, dVal: false, pcVal: false },
     },
     {
-      title: `第五餐(${getTimeText(times.startDay5Time, times.endDay5Time)})`,
-      dietContent: "1227Buffet",
+      title: `第五餐${getTimeText(times.startDay5Time, times.endDay5Time)}`,
+      dietContent: "",
       iDiet: "",
       remark: "1",
       remarks: { iVal: false, dVal: false, pcVal: false },
@@ -282,9 +148,18 @@ const MainDoc = ({ handleReset }) => {
 
   const [listDay, setListDay] = useState([]);
 
-  function handleChangeChart(event) {
+  const handleChangeChart = (event) => {
     setSelectedChart(event.target.value);
-  }
+  };
+
+  const handleDietContent = (e, day) => {
+    const updatedDietContent = dietContent; // 建立陣列副本
+
+    updatedDietContent[day - 1] = e.target.value;
+
+    setDietContent(updatedDietContent);
+  };
+  console.log(records);
 
   const handleChangeTime = (e, name) => {
     setTimes((prevState) => ({
@@ -346,8 +221,8 @@ const MainDoc = ({ handleReset }) => {
             {
               label: row[0],
               data: tmpArr,
-              borderColor: "rgb(255, 99, 132)",
-              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              borderColor: "rgb(22, 88, 146)",
+              backgroundColor: "rgba(22, 88, 146, 0.5)",
               pointStyle: false,
             },
           ],
@@ -356,7 +231,6 @@ const MainDoc = ({ handleReset }) => {
     });
 
     setCharts(alignedCharts);
-    setListDay(Object.keys(groupBy(alignedCharts, "label")));
     if (!isEmpty(alignedCharts) && selectedChart === "allDays") {
       setChart(alignedCharts);
     }
@@ -413,8 +287,8 @@ const MainDoc = ({ handleReset }) => {
                 {
                   label: row[0],
                   data: tmpArr,
-                  borderColor: "rgb(255, 99, 132)",
-                  backgroundColor: "rgba(255, 99, 132, 0.5)",
+                  borderColor: "rgb(22, 88, 146)",
+                  backgroundColor: "rgba(22, 88, 146, 0.5)",
                   pointStyle: false,
                 },
               ],
@@ -455,7 +329,7 @@ const MainDoc = ({ handleReset }) => {
               0,
             yMin: 50,
             yMax: 250,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            backgroundColor: "rgba(2, 152, 154, 0.34)",
           },
           box2: {
             type: "box",
@@ -466,7 +340,7 @@ const MainDoc = ({ handleReset }) => {
               0,
             yMin: 50,
             yMax: 250,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            backgroundColor: "rgba(2, 152, 154, 0.34)",
           },
           box3: {
             type: "box",
@@ -477,7 +351,7 @@ const MainDoc = ({ handleReset }) => {
               0,
             yMin: 50,
             yMax: 250,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            backgroundColor: "rgba(2, 152, 154, 0.34)",
           },
           box4: {
             type: "box",
@@ -488,7 +362,7 @@ const MainDoc = ({ handleReset }) => {
               0,
             yMin: 50,
             yMax: 250,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            backgroundColor: "rgba(2, 152, 154, 0.34)",
           },
           box5: {
             type: "box",
@@ -499,7 +373,7 @@ const MainDoc = ({ handleReset }) => {
               0,
             yMin: 50,
             yMax: 250,
-            backgroundColor: "rgba(255, 99, 132, 0.25)",
+            backgroundColor: "rgba(2, 152, 154, 0.34)",
           },
         },
       },
@@ -534,8 +408,8 @@ const MainDoc = ({ handleReset }) => {
   useEffect(() => {
     setRecords([
       {
-        title: `第一餐(${getTimeText(times.startDay1Time, times.endDay1Time)})`,
-        dietContent: "1227Buffet",
+        title: `第一餐${getTimeText(times.startDay1Time, times.endDay1Time)}`,
+        dietContent: dietContent[0],
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)),
           getJArr(
@@ -565,8 +439,8 @@ const MainDoc = ({ handleReset }) => {
         },
       },
       {
-        title: `第二餐(${getTimeText(times.startDay2Time, times.endDay2Time)})`,
-        dietContent: "1227Buffet",
+        title: `第二餐${getTimeText(times.startDay2Time, times.endDay2Time)}`,
+        dietContent: dietContent[1],
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)),
           getJArr(
@@ -596,8 +470,8 @@ const MainDoc = ({ handleReset }) => {
         },
       },
       {
-        title: `第三餐(${getTimeText(times.startDay3Time, times.endDay3Time)})`,
-        dietContent: "1227Buffet",
+        title: `第三餐${getTimeText(times.startDay3Time, times.endDay3Time)}`,
+        dietContent: dietContent[2],
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)),
           getJArr(
@@ -627,12 +501,12 @@ const MainDoc = ({ handleReset }) => {
         },
       },
       {
-        title: `第四餐(${getTimeText(
+        title: `第四餐${getTimeText(
           times.startDay4Time,
           times.endDay4Time,
           times.endDay4Time
-        )})`,
-        dietContent: "1227Buffet",
+        )}`,
+        dietContent: dietContent[3],
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)),
           getJArr(
@@ -662,12 +536,12 @@ const MainDoc = ({ handleReset }) => {
         },
       },
       {
-        title: `第五餐(${getTimeText(
+        title: `第五餐${getTimeText(
           times.startDay5Time,
           times.endDay5Time,
           times.endDay5Time
-        )})`,
-        dietContent: "1227Buffet",
+        )}`,
+        dietContent: dietContent[4],
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)),
           getJArr(
@@ -698,7 +572,7 @@ const MainDoc = ({ handleReset }) => {
         },
       },
     ]);
-  }, [times]);
+  }, [times, records]);
 
   return (
     <Box style={{ width: "100%" }}>
@@ -757,10 +631,12 @@ const MainDoc = ({ handleReset }) => {
               )}
               {selectedChart === "oneDay" && (
                 <AssignTable
+                  records={records}
                   listDay={listDay}
                   selectedDate={selectedDate}
                   handleDate={handleChangeDate}
                   handleTime={handleChangeTime}
+                  handleDietContent={handleDietContent}
                 />
               )}
               <Box className="flex space-x-2 my-2">

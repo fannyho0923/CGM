@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import React from "react";
+import { Box } from "@mui/material";
 import classNames from "classnames";
-import dayjs from "dayjs";
+import { getIDietBgColor } from "../../utils";
 
 const RecordTableTemplate = ({
   date = "",
@@ -15,7 +15,10 @@ const RecordTableTemplate = ({
   return (
     <Box className="border border-black w-1/5">
       <Box className="border-b border-black">
-        <Box className="flex border-b">
+        <Box
+          className="flex border-b text-white"
+          style={{ backgroundColor: "#2A4479" }}
+        >
           {idx === 0 && (
             <Box className="w-1/4 border-r-2 border-black py-2">餐別</Box>
           )}
@@ -23,9 +26,10 @@ const RecordTableTemplate = ({
         </Box>
         <Box
           className={classNames(
-            "grid divide-x",
+            "grid divide-x text-white",
             idx === 0 ? "grid-cols-4" : "grid-cols-3"
           )}
+          style={{ backgroundColor: "#2A4479" }}
         >
           {idx === 0 && (
             <Box className="py-2 text-sm border-r-2 border-black">日期</Box>
@@ -42,7 +46,10 @@ const RecordTableTemplate = ({
         )}
       >
         {idx === 0 && (
-          <Box className="flex items-center p-2 border-r-2 border-black">
+          <Box
+            className="flex items-center p-2 border-r-2 border-black"
+            style={{ backgroundColor: "#2A4479" }}
+          >
             {date}
           </Box>
         )}
@@ -51,7 +58,10 @@ const RecordTableTemplate = ({
         </Box>
         <Box
           className="flex items-center grow p-px"
-          style={{ backgroundColor: iDiet ? "rgb(163 230 53)" : "" }}
+          style={{
+            backgroundColor: iDiet ? getIDietBgColor(iDiet) : "",
+            color: iDiet > 10 ? "red" : "black",
+          }}
         >
           {iDiet || ""}
         </Box>
@@ -71,7 +81,7 @@ const RecordTableTemplate = ({
 function RecordSheet({ date = "", records = [] }) {
   return (
     <Box className="p-2 flex justify-center items-center">
-      <Box className="border border-black">
+      <Box className="border border-black w-full">
         <Box className="flex">
           {records.map((item, idx) => {
             const { title, dietContent, iDiet, remarks } = item;
