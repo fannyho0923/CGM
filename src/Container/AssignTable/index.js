@@ -5,7 +5,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
 } from "@mui/material";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -15,10 +14,8 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 const AssignTable = ({
   listDay,
   selectedDate,
-  records = [],
   handleDate = () => {},
   handleTime = () => {},
-  handleDietContent = () => {},
 }) => {
   return (
     <>
@@ -39,7 +36,7 @@ const AssignTable = ({
       <Box className="grid grid-cols-2 gap-4">
         <Box>
           <Typography>第一餐</Typography>
-          <Box className="flex space-x-2 items-center">
+          <Box className="flex space-x-2">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
                 <TimePicker
@@ -56,14 +53,6 @@ const AssignTable = ({
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Box className="mt-2">
-              <TextField
-                value={records[0].dietContent || ""}
-                label="飲食內容"
-                variant="outlined"
-                onChange={(e) => handleDietContent(e, 1)}
-              />
-            </Box>
           </Box>
         </Box>
         <Box>
@@ -85,14 +74,6 @@ const AssignTable = ({
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Box className="mt-2">
-              <TextField
-                label="飲食內容"
-                value={records[1].dietContent || ""}
-                variant="outlined"
-                onChange={(e) => handleDietContent(e, 2)}
-              />
-            </Box>
           </Box>
         </Box>
         <Box>
@@ -114,14 +95,6 @@ const AssignTable = ({
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Box className="mt-2">
-              <TextField
-                label="飲食內容"
-                value={records[2].dietContent || ""}
-                variant="outlined"
-                onChange={(e) => handleDietContent(e, 3)}
-              />
-            </Box>
           </Box>
         </Box>
         <Box>
@@ -143,14 +116,6 @@ const AssignTable = ({
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Box className="mt-2">
-              <TextField
-                label="飲食內容"
-                value={records[3].dietContent || ""}
-                variant="outlined"
-                onChange={(e) => handleDietContent(e, 4)}
-              />
-            </Box>
           </Box>
         </Box>
         <Box>
@@ -172,14 +137,6 @@ const AssignTable = ({
                 />
               </DemoContainer>
             </LocalizationProvider>
-            <Box className="mt-2">
-              <TextField
-                label="飲食內容"
-                value={records[4].dietContent || ""}
-                variant="outlined"
-                onChange={(e) => handleDietContent(e, 5)}
-              />
-            </Box>
           </Box>
         </Box>
       </Box>

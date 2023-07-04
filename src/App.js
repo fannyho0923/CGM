@@ -1,6 +1,12 @@
 import "./App.css";
 import { useReactToPrint } from "react-to-print";
-import React, { useState, useRef, useEffect, createRef } from "react";
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  createRef,
+} from "react";
 import dayjs from "dayjs";
 import { groupBy, round, isEmpty } from "lodash-es";
 import { ExcelRenderer } from "react-excel-renderer";
@@ -81,7 +87,7 @@ const RowRadioButtonsGroup = ({ onChange = () => {} }) => {
   );
 };
 
-const MainDoc = ({ handleReset }) => {
+const MainDoc = React.memo(({ handleReset }) => {
   const ref = createRef();
   const handlePrint = useReactToPrint({
     content: () => ref.current,
@@ -97,7 +103,6 @@ const MainDoc = ({ handleReset }) => {
   const [selectedChart, setSelectedChart] = useState("");
   const [showChart, setShowChart] = useState(false);
   const [dayVal, setDayVal] = useState([]);
-  const [dietContent, setDietContent] = useState([]);
   const [times, setTimes] = useState({
     startDateTime: "",
     startDay1Time: "",
@@ -151,15 +156,6 @@ const MainDoc = ({ handleReset }) => {
   const handleChangeChart = (event) => {
     setSelectedChart(event.target.value);
   };
-
-  const handleDietContent = (e, day) => {
-    const updatedDietContent = dietContent; // 建立陣列副本
-
-    updatedDietContent[day - 1] = e.target.value;
-
-    setDietContent(updatedDietContent);
-  };
-  console.log(records);
 
   const handleChangeTime = (e, name) => {
     setTimes((prevState) => ({
@@ -409,7 +405,7 @@ const MainDoc = ({ handleReset }) => {
     setRecords([
       {
         title: `第一餐${getTimeText(times.startDay1Time, times.endDay1Time)}`,
-        dietContent: dietContent[0],
+        dietContent: "",
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)),
           getJArr(
@@ -440,7 +436,7 @@ const MainDoc = ({ handleReset }) => {
       },
       {
         title: `第二餐${getTimeText(times.startDay2Time, times.endDay2Time)}`,
-        dietContent: dietContent[1],
+        dietContent: "",
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)),
           getJArr(
@@ -471,7 +467,7 @@ const MainDoc = ({ handleReset }) => {
       },
       {
         title: `第三餐${getTimeText(times.startDay3Time, times.endDay3Time)}`,
-        dietContent: dietContent[2],
+        dietContent: "",
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)),
           getJArr(
@@ -506,7 +502,7 @@ const MainDoc = ({ handleReset }) => {
           times.endDay4Time,
           times.endDay4Time
         )}`,
-        dietContent: dietContent[3],
+        dietContent: "",
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)),
           getJArr(
@@ -541,7 +537,7 @@ const MainDoc = ({ handleReset }) => {
           times.endDay5Time,
           times.endDay5Time
         )}`,
-        dietContent: dietContent[4],
+        dietContent: "",
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)),
           getJArr(
@@ -572,7 +568,7 @@ const MainDoc = ({ handleReset }) => {
         },
       },
     ]);
-  }, [times, records]);
+  }, [times]);
 
   return (
     <Box style={{ width: "100%" }}>
@@ -631,12 +627,10 @@ const MainDoc = ({ handleReset }) => {
               )}
               {selectedChart === "oneDay" && (
                 <AssignTable
-                  records={records}
                   listDay={listDay}
                   selectedDate={selectedDate}
                   handleDate={handleChangeDate}
                   handleTime={handleChangeTime}
-                  handleDietContent={handleDietContent}
                 />
               )}
               <Box className="flex space-x-2 my-2">
@@ -689,7 +683,7 @@ const MainDoc = ({ handleReset }) => {
       </div>
     </Box>
   );
-};
+});
 
 const MainChart = ({
   showChart = false,
@@ -722,11 +716,15 @@ const MainChart = ({
 
 function App() {
   const [count, setCount] = useState(0);
-  const handleReset = () => {
-    setCount((pre) => pre + 1);
-  };
+  const handleReset = useCallback(() => {
+    setCount((prevCount) => prevCount + 1);
+  }, []);
 
-  return <MainDoc key={count} handleReset={handleReset} />;
+  return (
+    <Box key={count}>
+      <MainDoc handleReset={handleReset} />
+    </Box>
+  );
 }
 
 export default App;
