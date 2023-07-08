@@ -1,4 +1,3 @@
-import { rgbToHex } from "@mui/material";
 import dayjs from "dayjs";
 import { round, isEmpty } from "lodash-es";
 
@@ -12,6 +11,32 @@ export const getIDietBgColor = (iDiet = 0) => {
   } else {
     return "#AFE489";
   }
+};
+
+export const getDietContent = (dayVal, startTime, endTime) => {
+  if (
+    isEmpty(dayVal) ||
+    isEmpty(startTime) ||
+    isEmpty(endTime) ||
+    startTime > endTime
+  ) {
+    return "";
+  }
+
+  const st =
+    dayVal?.findIndex(({ x }) => x === startTime.$H * 60 + startTime.$m) < 0
+      ? 0
+      : dayVal?.findIndex(({ x }) => x === startTime.$H * 60 + startTime.$m);
+  const et =
+    dayVal?.findIndex(({ x }) => x === endTime.$H * 60 + endTime.$m) < 0
+      ? 0
+      : dayVal?.findIndex(({ x }) => x === endTime.$H * 60 + endTime.$m);
+
+  const tmpDietContent = dayVal?.slice(st, et);
+  return tmpDietContent
+    .map((item) => item.dietContent)
+    .filter((item) => !isEmpty(item))
+    .join("+");
 };
 
 export const getTimeText = (startTime = "", endTime = "") => {

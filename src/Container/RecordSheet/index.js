@@ -53,7 +53,7 @@ const RecordTableTemplate = ({
             {date}
           </Box>
         )}
-        <Box className="flex items-center grow break-all p-px">
+        <Box className="flex grow p-x break-all overflow-auto">
           {dietContent}
         </Box>
         <Box

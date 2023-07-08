@@ -35,6 +35,7 @@ import {
   getIval,
   getDval,
   getPCval,
+  getDietContent,
 } from "../src/utils";
 import AssignTable from "../src/Container/AssignTable";
 import Dataset from "../src/Container/Dataset";
@@ -87,6 +88,54 @@ const RowRadioButtonsGroup = ({ onChange = () => {} }) => {
   );
 };
 
+const initTimes = {
+  startDateTime: "",
+  startDay1Time: "",
+  startDay2Time: "",
+  startDay3Time: "",
+  startDay4Time: "",
+  startDay5Time: "",
+  endDay1Time: "",
+  endDay2Time: "",
+  endDay3Time: "",
+  endDay4Time: "",
+  endDay5Time: "",
+};
+
+const initRecords = [
+  {
+    title: `第一餐`,
+    dietContent: "",
+    iDiet: "",
+    remarks: { iVal: false, dVal: false, pcVal: false },
+  },
+  {
+    title: `第二餐`,
+    dietContent: "",
+    iDiet: "",
+    remarks: { iVal: false, dVal: false, pcVal: false },
+  },
+  {
+    title: `第三餐`,
+    dietContent: "",
+    iDiet: "",
+    remarks: { iVal: false, dVal: false, pcVal: false },
+  },
+  {
+    title: `第四餐`,
+    dietContent: "",
+    iDiet: "",
+    remarks: { iVal: false, dVal: false, pcVal: false },
+  },
+  {
+    title: `第五餐`,
+    dietContent: "",
+    iDiet: "",
+    remark: "",
+    remarks: { iVal: false, dVal: false, pcVal: false },
+  },
+];
+
 const MainDoc = React.memo(({ handleReset }) => {
   const ref = createRef();
   const handlePrint = useReactToPrint({
@@ -98,58 +147,13 @@ const MainDoc = React.memo(({ handleReset }) => {
   const [oneChart, setOneChart] = useState([]);
   const [isFormInvalid, setIsFormInvalid] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
-  const [groupByDay, setGroupByDay] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedChart, setSelectedChart] = useState("");
   const [showChart, setShowChart] = useState(false);
   const [dayVal, setDayVal] = useState([]);
-  const [times, setTimes] = useState({
-    startDateTime: "",
-    startDay1Time: "",
-    startDay2Time: "",
-    startDay3Time: "",
-    startDay4Time: "",
-    startDay5Time: "",
-    endDay1Time: "",
-    endDay2Time: "",
-    endDay3Time: "",
-    endDay4Time: "",
-    endDay5Time: "",
-  });
+  const [times, setTimes] = useState(initTimes);
 
-  const [records, setRecords] = useState([
-    {
-      title: `第一餐${getTimeText(times.startDay1Time, times.endDay1Time)}`,
-      dietContent: "",
-      iDiet: "",
-      remarks: { iVal: false, dVal: false, pcVal: false },
-    },
-    {
-      title: `第二餐${getTimeText(times.startDay2Time, times.endDay2Time)}`,
-      dietContent: "",
-      iDiet: "",
-      remarks: { iVal: false, dVal: false, pcVal: false },
-    },
-    {
-      title: `第三餐${getTimeText(times.startDay3Time, times.endDay3Time)}`,
-      dietContent: "",
-      iDiet: "",
-      remarks: { iVal: false, dVal: false, pcVal: false },
-    },
-    {
-      title: `第四餐${getTimeText(times.startDay4Time, times.endDay4Time)}`,
-      dietContent: "",
-      iDiet: "",
-      remarks: { iVal: false, dVal: false, pcVal: false },
-    },
-    {
-      title: `第五餐${getTimeText(times.startDay5Time, times.endDay5Time)}`,
-      dietContent: "",
-      iDiet: "",
-      remark: "1",
-      remarks: { iVal: false, dVal: false, pcVal: false },
-    },
-  ]);
+  const [records, setRecords] = useState(initRecords);
 
   const [listDay, setListDay] = useState([]);
 
@@ -203,6 +207,7 @@ const MainDoc = React.memo(({ handleReset }) => {
           x: row[1][idx][1] * 60 + row[1][idx][2],
           y: row[1][idx][3],
           bsv: round(row[1][idx][3] / 18, 1),
+          dietContent: row[1][idx][4] || "",
         });
       }
       alignedCharts.push({
@@ -227,8 +232,11 @@ const MainDoc = React.memo(({ handleReset }) => {
     });
 
     setCharts(alignedCharts);
+    setOneChart(alignedCharts.find((item) => item.label === selectedDate));
     if (!isEmpty(alignedCharts) && selectedChart === "allDays") {
       setChart(alignedCharts);
+    } else {
+      setChart([alignedCharts.find((item) => item.label === selectedDate)]);
     }
     setShowChart(true);
   };
@@ -260,7 +268,6 @@ const MainDoc = React.memo(({ handleReset }) => {
         const rows = groupBy(resp.rows.slice(1), (date) => {
           return date[0];
         });
-        setGroupByDay(rows);
         const tmpCharts = [];
         const selectedDateTime = 0;
         Object.entries(rows).map((row) => {
@@ -270,6 +277,7 @@ const MainDoc = React.memo(({ handleReset }) => {
               x: row[1][idx][1] * 60 + row[1][idx][2],
               y: row[1][idx][3],
               bsv: round(row[1][idx][3] / 18, 1),
+              dietContent: row[1][idx][4] || "",
             });
           }
 
@@ -318,10 +326,17 @@ const MainDoc = React.memo(({ handleReset }) => {
         annotations: {
           box1: {
             type: "box",
-            xMin: times.startDay1Time.$H * 60 + times.startDay1Time.$m || 0,
+            xMin:
+              times.startDay1Time.$H * 60 +
+                times.startDay1Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) || 0,
             xMax:
-              times.endDay1Time.$H * 60 + times.endDay1Time.$m ||
-              times.startDay1Time.$H * 60 + times.startDay1Time.$m ||
+              times.endDay1Time.$H * 60 +
+                times.endDay1Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
+              times.startDay1Time.$H * 60 +
+                times.startDay1Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
               0,
             yMin: 50,
             yMax: 250,
@@ -329,10 +344,17 @@ const MainDoc = React.memo(({ handleReset }) => {
           },
           box2: {
             type: "box",
-            xMin: times.startDay2Time.$H * 60 + times.startDay2Time.$m || 0,
+            xMin:
+              times.startDay2Time.$H * 60 +
+                times.startDay2Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) || 0,
             xMax:
-              times.endDay2Time.$H * 60 + times.endDay2Time.$m ||
-              times.startDay2Time.$H * 60 + times.startDay2Time.$m ||
+              times.endDay2Time.$H * 60 +
+                times.endDay2Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
+              times.startDay2Time.$H * 60 +
+                times.startDay2Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
               0,
             yMin: 50,
             yMax: 250,
@@ -340,10 +362,17 @@ const MainDoc = React.memo(({ handleReset }) => {
           },
           box3: {
             type: "box",
-            xMin: times.startDay3Time.$H * 60 + times.startDay3Time.$m || 0,
+            xMin:
+              times.startDay3Time.$H * 60 +
+                times.startDay3Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) || 0,
             xMax:
-              times.endDay3Time.$H * 60 + times.endDay3Time.$m ||
-              times.startDay3Time.$H * 60 + times.startDay3Time.$m ||
+              times.endDay3Time.$H * 60 +
+                times.endDay3Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
+              times.startDay3Time.$H * 60 +
+                times.startDay3Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
               0,
             yMin: 50,
             yMax: 250,
@@ -351,10 +380,17 @@ const MainDoc = React.memo(({ handleReset }) => {
           },
           box4: {
             type: "box",
-            xMin: times.startDay4Time.$H * 60 + times.startDay4Time.$m || 0,
+            xMin:
+              times.startDay4Time.$H * 60 +
+                times.startDay4Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) || 0,
             xMax:
-              times.endDay4Time.$H * 60 + times.endDay4Time.$m ||
-              times.startDay4Time.$H * 60 + times.startDay4Time.$m ||
+              times.endDay4Time.$H * 60 +
+                times.endDay4Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
+              times.startDay4Time.$H * 60 +
+                times.startDay4Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
               0,
             yMin: 50,
             yMax: 250,
@@ -362,10 +398,17 @@ const MainDoc = React.memo(({ handleReset }) => {
           },
           box5: {
             type: "box",
-            xMin: times.startDay5Time.$H * 60 + times.startDay5Time.$m || 0,
+            xMin:
+              times.startDay5Time.$H * 60 +
+                times.startDay5Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) || 0,
             xMax:
-              times.endDay5Time.$H * 60 + times.endDay5Time.$m ||
-              times.startDay5Time.$H * 60 + times.startDay5Time.$m ||
+              times.endDay5Time.$H * 60 +
+                times.endDay5Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
+              times.startDay5Time.$H * 60 +
+                times.startDay5Time.$m -
+                (times.startDateTime.$H * 60 + times.startDateTime.$m) ||
               0,
             yMin: 50,
             yMax: 250,
@@ -378,24 +421,28 @@ const MainDoc = React.memo(({ handleReset }) => {
 
   useEffect(() => {
     setShowChart(false);
+    setTimes(initTimes);
+    setRecords(initRecords);
     if (selectedChart === "allDays") {
       setSelectedDate("");
+      setChart(charts);
+    } else {
+      setChart(oneChart);
     }
-    setChart(selectedChart === "allDays" ? charts : oneChart);
-  }, [selectedChart, selectedDate, times.startDateTime]);
+  }, [selectedChart]);
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && chart) {
       setChart([charts.find(({ label }) => label === selectedDate)]);
       setDayVal(chart[0]?.data.datasets[0].data);
     }
   }, [selectedDate]);
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && chart) {
       setDayVal(chart[0]?.data.datasets[0].data);
     }
-  }, [chart]);
+  }, [chart, selectedDate]);
 
   useEffect(() => {
     setShowChart(false);
@@ -405,7 +452,11 @@ const MainDoc = React.memo(({ handleReset }) => {
     setRecords([
       {
         title: `第一餐${getTimeText(times.startDay1Time, times.endDay1Time)}`,
-        dietContent: "",
+        dietContent: getDietContent(
+          dayVal,
+          times.startDay1Time,
+          times.endDay1Time
+        ),
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay1Time, times.endDay1Time)),
           getJArr(
@@ -436,7 +487,11 @@ const MainDoc = React.memo(({ handleReset }) => {
       },
       {
         title: `第二餐${getTimeText(times.startDay2Time, times.endDay2Time)}`,
-        dietContent: "",
+        dietContent: getDietContent(
+          dayVal,
+          times.startDay2Time,
+          times.endDay2Time
+        ),
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay2Time, times.endDay2Time)),
           getJArr(
@@ -467,7 +522,11 @@ const MainDoc = React.memo(({ handleReset }) => {
       },
       {
         title: `第三餐${getTimeText(times.startDay3Time, times.endDay3Time)}`,
-        dietContent: "",
+        dietContent: getDietContent(
+          dayVal,
+          times.startDay3Time,
+          times.endDay3Time
+        ),
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay3Time, times.endDay3Time)),
           getJArr(
@@ -502,7 +561,11 @@ const MainDoc = React.memo(({ handleReset }) => {
           times.endDay4Time,
           times.endDay4Time
         )}`,
-        dietContent: "",
+        dietContent: getDietContent(
+          dayVal,
+          times.startDay4Time,
+          times.endDay4Time
+        ),
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay4Time, times.endDay4Time)),
           getJArr(
@@ -537,7 +600,11 @@ const MainDoc = React.memo(({ handleReset }) => {
           times.endDay5Time,
           times.endDay5Time
         )}`,
-        dietContent: "",
+        dietContent: getDietContent(
+          dayVal,
+          times.startDay5Time,
+          times.endDay5Time
+        ),
         iDiet: getIDiet(
           getIArr(getRangeArr(dayVal, times.startDay5Time, times.endDay5Time)),
           getJArr(
@@ -568,7 +635,7 @@ const MainDoc = React.memo(({ handleReset }) => {
         },
       },
     ]);
-  }, [times]);
+  }, [dayVal, times]);
 
   return (
     <Box style={{ width: "100%" }}>
