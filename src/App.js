@@ -306,6 +306,7 @@ const MainDoc = React.memo(({ handleReset }) => {
   };
 
   const opts = {
+    responsive: true,
     scales: {
       x: {
         grid: {
